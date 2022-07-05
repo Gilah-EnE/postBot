@@ -38,29 +38,31 @@ else:
 
 start_hour = conf.get("setup", "start_hour")
 stop_hour = conf.get("setup", "stop_hour")
+days_in_advance = conf.get("setup", "days_in_advance")
 
 slots = list()
 
 if mode == "fixed_interval":
     initial_timestamp = date.timestamp()
 
-    if date.hour <= int(start_hour):
-        start_date = datetime(date.year, date.month, date.day, int(start_hour) - 1)
+for day_in_advance in range(days_in_advance):
+    if date.hour <= int(start_hour) or day_in_advance >= 1:
+        start_date = datetime(date.year, date.month, date.day + day_in_advance, int(start_hour))
     elif date.hour > int(start_hour):
-        start_date = datetime(date.year, date.month, date.day, int(date.hour))
+        start_date = datetime(date.year, date.month, date.day + day_in_advance, int(date.hour))
     else:
         start_date = None
 
-    stop_date = datetime(date.year, date.month, date.day, int(stop_hour))
+    stop_date = datetime(date.year, date.month, date.day + day_in_advance, int(stop_hour))
 
     new_initial_timestamp = int(start_date.timestamp())
-    interval = conf.get("setup", "interval").split(":")
+    interval = '0:20'.split(":")
     interval_timestamp = int(int(interval[0]) * 3600 + int(interval[1]) * 60)
 
     mod_list = [x for x in range(new_initial_timestamp, int(stop_date.timestamp() + 1), interval_timestamp)]
 
     for mod in mod_list:
-        if mod < int(initial_timestamp):
+        if mod < int(initial_timestamp) and day_in_advance == 0:
             pass
         else:
             slots.append(mod)
@@ -133,7 +135,7 @@ with pyrogram.Client("sender", api_id=main_section["api_id"], api_hash=main_sect
 if len(file_order) == 0:
     print("Всі файли відправлено.")
 else:
-    print(f"Не відправлено {len(file_order)} файл(ів), а саме {[file.name for file in file_order if file.is_file()]}")
+        print(f"Не відправлено {len(file_order)} файл(ів), а саме {[file.name for file in file_order if file.is_file()]}")
 
 sender.start()
 request = sender.send(functions.messages.GetScheduledHistory(
