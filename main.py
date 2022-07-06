@@ -45,27 +45,27 @@ slots = list()
 if mode == "fixed_interval":
     initial_timestamp = date.timestamp()
 
-for day_in_advance in range(days_in_advance):
-    if date.hour <= int(start_hour) or day_in_advance >= 1:
-        start_date = datetime(date.year, date.month, date.day + day_in_advance, int(start_hour))
-    elif date.hour > int(start_hour):
-        start_date = datetime(date.year, date.month, date.day + day_in_advance, int(date.hour))
-    else:
-        start_date = None
-
-    stop_date = datetime(date.year, date.month, date.day + day_in_advance, int(stop_hour))
-
-    new_initial_timestamp = int(start_date.timestamp())
-    interval = '0:20'.split(":")
-    interval_timestamp = int(int(interval[0]) * 3600 + int(interval[1]) * 60)
-
-    mod_list = [x for x in range(new_initial_timestamp, int(stop_date.timestamp() + 1), interval_timestamp)]
-
-    for mod in mod_list:
-        if mod < int(initial_timestamp) and day_in_advance == 0:
-            pass
+    for day_in_advance in range(days_in_advance):
+        if date.hour <= int(start_hour) or day_in_advance >= 1:
+            start_date = datetime(date.year, date.month, date.day + day_in_advance, int(start_hour))
+        elif date.hour > int(start_hour):
+            start_date = datetime(date.year, date.month, date.day + day_in_advance, int(date.hour))
         else:
-            slots.append(mod)
+            start_date = None
+
+        stop_date = datetime(date.year, date.month, date.day + day_in_advance, int(stop_hour))
+
+        new_initial_timestamp = int(start_date.timestamp())
+        interval = '0:20'.split(":")
+        interval_timestamp = int(int(interval[0]) * 3600 + int(interval[1]) * 60)
+
+        mod_list = [x for x in range(new_initial_timestamp, int(stop_date.timestamp() + 1), interval_timestamp)]
+
+        for mod in mod_list:
+            if mod < int(initial_timestamp) and day_in_advance == 0:
+                pass
+            else:
+                slots.append(mod)
 
 elif mode == "manual":
     raw_list = json.loads(conf.get("timetable", "manual_slots"))
@@ -73,9 +73,13 @@ elif mode == "manual":
     for i in raw_list:
         cooked_list.append(tuple(i.split(":")))
 
-    for slot in cooked_list:
-        datetime_obj = datetime(date.year, date.month, date.day, int(slot[0]), int(slot[1]))
-        slots.append(datetime_obj.timestamp())
+    for day_in_advance in range(days_in_advance):
+        for slot in cooked_list:
+            datetime_obj = datetime(date.year, date.month, date.day, int(slot[0]), int(slot[1]))
+            if int(datetime_obj.timestamp()) <= int(date.timestamp()) and day_in_advance == 0:
+                pass
+            else:
+                slots.append(int(datetime_obj.timestamp()))
 else:
     print("Вибрано непідтримуваний режим роботи.")
     exit(1)
