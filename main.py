@@ -3,10 +3,12 @@ import json
 import pathlib
 import random
 from datetime import datetime
+from click import password_option
 
 import prettytable
 import pyrogram
 from pyrogram.raw import functions
+from zmq import proxy
 
 conf = configparser.ConfigParser()
 conf.read("./config.ini")
@@ -20,6 +22,13 @@ date_input_needed = conf.getboolean("setup", "date_input_needed")
 verbose = conf.getboolean("setup", "verbose")
 kebab_action = conf.get("files", "file_action")
 remove_temp_file = conf.getboolean("files", "remove_temp_file")
+
+proxy_use = conf.getboolean("proxy", "use")
+proxy_scheme = conf.get("proxy", "scheme")
+proxy_hostname = conf.get("proxy", "hostname")
+proxy_port = int(conf.get("proxy", "port"))
+proxy_username = conf.get("proxy", "username")
+proxy_password = conf.get("proxy", "password")
 
 if kebab_action not in ["remove", "move", "keep"]:
     print("Помилка: неправильно вказано дію з відправленим файлом.")
@@ -119,7 +128,17 @@ if not new_folder_object.exists():
 
 file_order = random.sample(file_list, len(slots))
 
-with pyrogram.Client("sender", api_id=main_section["api_id"], api_hash=main_section["api_hash"]) as sender:
+if proxy_use:
+    proxy = {
+        "scheme": proxy_scheme,
+        "hostname": proxy_hostname,
+        "port": proxy_port,
+        "username": proxy_username,
+        "password": proxy_password
+    }
+else: proxy = None
+
+with pyrogram.Client("sender", api_id=main_section["api_id"], api_hash=main_section["api_hash"], proxy=proxy) as sender:
     for timeslot in slots:
         file_to_send = random.choice(file_order)
         file_order.remove(file_to_send)
