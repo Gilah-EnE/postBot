@@ -117,3 +117,4 @@ dmypy.json
 .pyre/
 .session
 *.session
+sender.session
