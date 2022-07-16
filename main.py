@@ -38,7 +38,7 @@ else:
 
 start_hour = conf.get("setup", "start_hour")
 stop_hour = conf.get("setup", "stop_hour")
-days_in_advance = conf.get("setup", "days_in_advance")
+days_in_advance = int(conf.get("setup", "days_in_advance")) + 1     # variable context means "how many days to fill in advance", and range() func accepts quantity of elements to iterate over, not end value. That's why I added +1 as magic num.
 
 slots = list()
 
@@ -56,7 +56,7 @@ if mode == "fixed_interval":
         stop_date = datetime(date.year, date.month, date.day + day_in_advance, int(stop_hour))
 
         new_initial_timestamp = int(start_date.timestamp())
-        interval = '0:20'.split(":")
+        interval = conf.get("setup", "interval").split(":")
         interval_timestamp = int(int(interval[0]) * 3600 + int(interval[1]) * 60)
 
         mod_list = [x for x in range(new_initial_timestamp, int(stop_date.timestamp() + 1), interval_timestamp)]
@@ -124,7 +124,7 @@ with pyrogram.Client("sender", api_id=main_section["api_id"], api_hash=main_sect
         file_to_send = random.choice(file_order)
         file_order.remove(file_to_send)
         print(f"Файл {file_to_send.name} додано у відкладені, заплановано на {datetime.fromtimestamp(timeslot)}")
-        sender.send_photo(main_section["channel_link"], photo=file_to_send, schedule_date=int(timeslot))
+        sender.send_photo(main_section["channel_link"], photo=file_to_send, schedule_date=datetime.fromtimestamp(timeslot))
 
         if kebab_action == "remove":
             file_to_send.unlink()
@@ -136,24 +136,23 @@ with pyrogram.Client("sender", api_id=main_section["api_id"], api_hash=main_sect
             print("Якась незрозуміла хуйня, русскій воєнний корабль йди нахуй!")
             exit(1)
 
-if len(file_order) == 0:
-    print("Всі файли відправлено.")
-else:
-        print(f"Не відправлено {len(file_order)} файл(ів), а саме {[file.name for file in file_order if file.is_file()]}")
+    if len(file_order) == 0:
+        print("Всі файли відправлено.")
+    else:
+            print(f"Не відправлено {len(file_order)} файл(ів), а саме {[file.name for file in file_order if file.is_file()]}")
 
-sender.start()
-request = sender.send(functions.messages.GetScheduledHistory(
-    peer=sender.resolve_peer(main_section["channel_link"]),
-    hash=0))
+    request = sender.invoke(functions.messages.GetScheduledHistory(
+        peer=sender.resolve_peer(main_section["channel_link"]),
+        hash=0))
 
-with open(json_filename, "w") as temp_file_object:
-    print(request, file=temp_file_object)
-with open(json_filename, "r") as temp_file_object:
-    data = json.load(temp_file_object)
+    with open(json_filename, "w") as temp_file_object:
+        print(request, file=temp_file_object)
+    with open(json_filename, "r") as temp_file_object:
+        data = json.load(temp_file_object)
 
-with pathlib.Path("./posts.json") as temp_file_pathlib:
-    if temp_file_pathlib.exists() and remove_temp_file:
-        temp_file_pathlib.unlink()
+    with pathlib.Path("./posts.json") as temp_file_pathlib:
+        if temp_file_pathlib.exists() and remove_temp_file:
+            temp_file_pathlib.unlink()
 
 msg = data["messages"]
 checklist = list()
