@@ -3,12 +3,10 @@ import json
 import pathlib
 import random
 from datetime import datetime
-from click import password_option
 
 import prettytable
 import pyrogram
 from pyrogram.raw import functions
-from zmq import proxy
 
 conf = configparser.ConfigParser()
 conf.read("./config.ini")
