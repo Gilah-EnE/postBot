@@ -9,24 +9,29 @@ import pyrogram
 from pyrogram.raw import functions
 
 conf = configparser.ConfigParser()
-conf.read("./config.ini")
+try:
+    conf.read("./config.ini")
 
-main_section = dict(conf.items("main"))
+    main_section = dict(conf.items("main"))
 
-json_filename = conf.get("files", "json_filename")
+    json_filename = conf.get("files", "json_filename")
 
-mode = conf.get("setup", "mode")
-date_input_needed = conf.getboolean("setup", "date_input_needed")
-verbose = conf.getboolean("setup", "verbose")
-kebab_action = conf.get("files", "file_action")
-remove_temp_file = conf.getboolean("files", "remove_temp_file")
+    mode = conf.get("setup", "mode")
+    date_input_needed = conf.getboolean("setup", "date_input_needed")
+    verbose = conf.getboolean("setup", "verbose")
+    kebab_action = conf.get("files", "file_action")
+    remove_temp_file = conf.getboolean("files", "remove_temp_file")
 
-proxy_use = conf.getboolean("proxy", "use")
-proxy_scheme = conf.get("proxy", "scheme")
-proxy_hostname = conf.get("proxy", "hostname")
-proxy_port = int(conf.get("proxy", "port"))
-proxy_username = conf.get("proxy", "username")
-proxy_password = conf.get("proxy", "password")
+    proxy_use = conf.getboolean("proxy", "use")
+    if proxy_use:
+        proxy_scheme = conf.get("proxy", "scheme")
+        proxy_hostname = conf.get("proxy", "hostname")
+        proxy_port = int(conf.get("proxy", "port"))
+        proxy_username = conf.get("proxy", "username")
+        proxy_password = conf.get("proxy", "password")
+except:
+    print("Помилка конфігурації.")
+    exit(1)
 
 if kebab_action not in ["remove", "move", "keep"]:
     print("Помилка: неправильно вказано дію з відправленим файлом.")
