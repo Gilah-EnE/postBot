@@ -1,4 +1,3 @@
-import configparser
 import json
 import pathlib
 import random
@@ -8,36 +7,13 @@ import prettytable
 import pyrogram
 from pyrogram.raw import functions
 
-conf = configparser.ConfigParser()
-try:
-    conf.read("./config.ini")
+conf = json.load(open("config.json", "r"))
 
-    main_section = dict(conf.items("main"))
-
-    json_filename = conf.get("files", "json_filename")
-
-    mode = conf.get("setup", "mode")
-    date_input_needed = conf.getboolean("setup", "date_input_needed")
-    verbose = conf.getboolean("setup", "verbose")
-    kebab_action = conf.get("files", "file_action")
-    remove_temp_file = conf.getboolean("files", "remove_temp_file")
-
-    proxy_use = conf.getboolean("proxy", "use")
-    if proxy_use:
-        proxy_scheme = conf.get("proxy", "scheme")
-        proxy_hostname = conf.get("proxy", "hostname")
-        proxy_port = int(conf.get("proxy", "port"))
-        proxy_username = conf.get("proxy", "username")
-        proxy_password = conf.get("proxy", "password")
-except:
-    print("Помилка конфігурації.")
-    exit(1)
-
-if kebab_action not in ["remove", "move", "keep"]:
+if conf["files"]["file_action"] not in ["remove", "move", "keep"]:
     print("Помилка: неправильно вказано дію з відправленим файлом.")
-    kebab_action = input("keep - залишити; remove - видалити; move - перемістити в окрему папку. ")
+    conf["files"]["file_action"] = input("keep - залишити; remove - видалити; move - перемістити в окрему папку. ")
 
-if date_input_needed:
+if conf["setup"]["date_input_needed"]:
     raw_date = input("Введіть дату (ДД.ММ.РРРР), на яку треба заповнити відкладені"
                      " (натисніть Enter для вибору сьогоднішнього дня): ")
 
@@ -48,27 +24,25 @@ if date_input_needed:
 else:
     date = datetime.today()
 
-start_hour = conf.get("setup", "start_hour")
-stop_hour = conf.get("setup", "stop_hour")
-days_in_advance = int(conf.get("setup", "days_in_advance")) + 1     # variable context means "how many days to fill in advance", and range() func accepts quantity of elements to iterate over, not end value. That's why I added +1 as magic num.
+days_in_advance = conf["setup"]["days_in_advance"] + 1     # variable context means "how many days to fill in advance", and range() func accepts quantity of elements to iterate over, not end value. That's why I added +1 as magic num.
 
 slots = list()
 
-if mode == "fixed_interval":
+if conf["setup"]["mode"] == "fixed_interval":
     initial_timestamp = date.timestamp()
 
     for day_in_advance in range(days_in_advance):
-        if date.hour <= int(start_hour) or day_in_advance >= 1:
-            start_date = datetime(date.year, date.month, date.day + day_in_advance, int(start_hour))
-        elif date.hour > int(start_hour):
+        if date.hour <= int(conf["setup"]["start_hour"]) or day_in_advance >= 1:
+            start_date = datetime(date.year, date.month, date.day + day_in_advance, int(conf["setup"]["start_hour"]))
+        elif date.hour > int(conf["setup"]["start_hour"]):
             start_date = datetime(date.year, date.month, date.day + day_in_advance, int(date.hour))
         else:
             start_date = None
 
-        stop_date = datetime(date.year, date.month, date.day + day_in_advance, int(stop_hour))
+        stop_date = datetime(date.year, date.month, date.day + day_in_advance, int(conf["setup"]["stop_hour"]))
 
         new_initial_timestamp = int(start_date.timestamp())
-        interval = conf.get("setup", "interval").split(":")
+        interval = conf["setup"]["interval"].split(":")
         interval_timestamp = int(int(interval[0]) * 3600 + int(interval[1]) * 60)
 
         mod_list = [x for x in range(new_initial_timestamp, int(stop_date.timestamp() + 1), interval_timestamp)]
@@ -79,8 +53,8 @@ if mode == "fixed_interval":
             else:
                 slots.append(mod)
 
-elif mode == "manual":
-    raw_list = json.loads(conf.get("timetable", "manual_slots"))
+elif conf["setup"]["mode"] == "manual":
+    raw_list = conf["timetable"]["manual_slots"]
     cooked_list = list()
     for i in raw_list:
         cooked_list.append(tuple(i.split(":")))
@@ -96,20 +70,20 @@ else:
     print("Вибрано непідтримуваний режим роботи.")
     exit(1)
 
-if verbose:
+if conf["setup"]["verbose"]:
     print("Список дат:\n")
     [print(datetime.fromtimestamp(ts)) for ts in slots]
 
-path_object = pathlib.Path(conf.get("files", "path"))
+path_object = pathlib.Path(conf["files"]["path"])
 if not path_object.exists():
     print("Шлях не знайдено.")
     exit(1)
 
-accepted_formats = json.loads(conf.get("files", "accepted_formats"))
+accepted_formats = conf["files"]["accepted_formats"]
 
 files = [[unit.stem, unit.suffix] for unit in path_object.iterdir() if
          unit.is_file() and unit.suffix in accepted_formats]
-if verbose:
+if conf["setup"]["verbose"]:
     table = prettytable.PrettyTable()
     table.field_names = ["Ім'я", "Розширення"]
 
@@ -131,28 +105,28 @@ if not new_folder_object.exists():
 
 file_order = random.sample(file_list, len(slots))
 
-if proxy_use:
+if conf["proxy"]["use"]:
     proxy = {
-        "scheme": proxy_scheme,
-        "hostname": proxy_hostname,
-        "port": proxy_port,
-        "username": proxy_username,
-        "password": proxy_password
+        "scheme": conf["proxy"]["scheme"],
+        "hostname": conf["proxy"]["hostname"],
+        "port": conf["proxy"]["port"],
+        "username": conf["proxy"]["username"],
+        "password": conf["proxy"]["password"]
     }
 else: proxy = None
 
-with pyrogram.Client("sender", api_id=main_section["api_id"], api_hash=main_section["api_hash"], proxy=proxy) as sender:
+with pyrogram.Client("sender", api_id=conf["main"]["api_id"], api_hash=conf["main"]["api_hash"], proxy=proxy) as sender:
     for timeslot in slots:
         file_to_send = random.choice(file_order)
         file_order.remove(file_to_send)
         print(f"Файл {file_to_send.name} додано у відкладені, заплановано на {datetime.fromtimestamp(timeslot)}")
-        sender.send_photo(main_section["channel_link"], photo=file_to_send, schedule_date=datetime.fromtimestamp(timeslot))
+        sender.send_photo(conf["main"]["channel_link"], photo=file_to_send, schedule_date=datetime.fromtimestamp(timeslot))
 
-        if kebab_action == "remove":
+        if conf["files"]["file_action"] == "remove":
             file_to_send.unlink()
-        elif kebab_action == "move":
+        elif conf["files"]["file_action"] == "move":
             file_to_send.rename(f"{str(path_object)}/Надіслані/{file_to_send.name}")
-        elif kebab_action == "keep":
+        elif conf["files"]["file_action"] == "keep":
             pass
         else:
             print("Якась незрозуміла хуйня, русскій воєнний корабль йди нахуй!")
@@ -164,22 +138,22 @@ with pyrogram.Client("sender", api_id=main_section["api_id"], api_hash=main_sect
             print(f"Не відправлено {len(file_order)} файл(ів), а саме {[file.name for file in file_order if file.is_file()]}")
 
     request = sender.invoke(functions.messages.GetScheduledHistory(
-        peer=sender.resolve_peer(main_section["channel_link"]),
+        peer=sender.resolve_peer(conf["main"]["channel_link"]),
         hash=0))
 
-    with open(json_filename, "w") as temp_file_object:
+    with open(conf["files"]["temp_filename"], "w") as temp_file_object:
         print(request, file=temp_file_object)
-    with open(json_filename, "r") as temp_file_object:
+    with open(conf["files"]["temp_filename"], "r") as temp_file_object:
         data = json.load(temp_file_object)
 
     with pathlib.Path("./posts.json") as temp_file_pathlib:
-        if temp_file_pathlib.exists() and remove_temp_file:
+        if temp_file_pathlib.exists() and conf["files"]["remove_temp_file"]:
             temp_file_pathlib.unlink()
 
 msg = data["messages"]
 checklist = list()
 
-if verbose:
+if conf["setup"]["verbose"]:
     print("\nПеревірка черги повідомлень:")
 
 checklist_ts = list()
@@ -187,6 +161,6 @@ checklist_ts = list()
 for message in msg:
     msg_date = datetime.fromtimestamp(message["date"])
 
-    if verbose:
+    if conf["setup"]["verbose"]:
         print(msg_date)
         checklist.append(msg_date)
