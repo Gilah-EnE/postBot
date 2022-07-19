@@ -1,7 +1,7 @@
 import json
 import pathlib
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import prettytable
 import pyrogram
@@ -33,13 +33,13 @@ if conf["setup"]["mode"] == "fixed_interval":
 
     for day_in_advance in range(days_in_advance):
         if date.hour <= int(conf["setup"]["start_hour"]) or day_in_advance >= 1:
-            start_date = datetime(date.year, date.month, date.day + day_in_advance, int(conf["setup"]["start_hour"]))
+            start_date = datetime(date.year, date.month, date.day, int(conf["setup"]["start_hour"])) + timedelta(days=day_in_advance)
         elif date.hour > int(conf["setup"]["start_hour"]):
-            start_date = datetime(date.year, date.month, date.day + day_in_advance, int(date.hour))
+            start_date = datetime(date.year, date.month, date.day, int(date.hour)) + timedelta(days=day_in_advance)
         else:
             start_date = None
 
-        stop_date = datetime(date.year, date.month, date.day + day_in_advance, int(conf["setup"]["stop_hour"]))
+        stop_date = datetime(date.year, date.month, date.day, int(conf["setup"]["stop_hour"])) + timedelta(days=day_in_advance)
 
         new_initial_timestamp = int(start_date.timestamp())
         interval = conf["setup"]["interval"].split(":")

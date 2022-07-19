@@ -19,7 +19,7 @@
         "interval": "01:00",
         "date_input_needed": false,
         "verbose": true,
-        "days_in_advance": 1
+        "days_in_advance": 20
     },
     "timetable": {
         "manual_slots": ["1:23", "2:34", "3:45", "4:56"]
