@@ -74,6 +74,15 @@ if conf["setup"]["verbose"]:
     print("Список дат:\n")
     [print(datetime.fromtimestamp(ts)) for ts in slots]
 
+if len(slots) >= 100:
+    continue_flag = input(f"Перевищено ліміт відкладених повідомлень. Останній запланований пост буде мати дату {datetime.fromtimestamp(slots[100])}. Продовжити чи скасувати (Y/N)? ")
+    if continue_flag == "Y" or continue_flag == "y":
+        slots = slots[0:100]
+    elif continue_flag == "N" or continue_flag == "n":
+        exit(1)
+    else:
+        exit(1)
+
 path_object = pathlib.Path(conf["files"]["path"])
 if not path_object.exists():
     print("Шлях не знайдено.")
