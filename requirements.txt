@@ -1,2 +1,3 @@
+Pillow==9.2.0
 prettytable==3.3.0
-Pyrogram==2.0.33
+Pyrogram==2.0.34

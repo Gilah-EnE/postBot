@@ -2,6 +2,7 @@ import json
 import pathlib
 import random
 from datetime import datetime, timedelta
+from PIL import Image
 
 import prettytable
 import pyrogram
@@ -108,7 +109,7 @@ if len(files) < len(slots):
     print("Недостатньо файлів для заповнення черги.")
     exit(1)
 
-new_folder_object = pathlib.WindowsPath(f"{str(path_object)}\\Надіслані")
+new_folder_object = pathlib.Path(f"{str(path_object)}\\Надіслані")
 if not new_folder_object.exists():
     new_folder_object.mkdir()
 
@@ -127,7 +128,17 @@ else: proxy = None
 with pyrogram.Client("sender", api_id=conf["main"]["api_id"], api_hash=conf["main"]["api_hash"], proxy=proxy) as sender:
     for timeslot in slots:
         file_to_send = random.choice(file_order)
-        file_order.remove(file_to_send)
+        
+        if file_to_send.stat().st_size / 1048576 > 5:
+            img = Image.open(file_to_send)
+            new_path = f'{file_to_send.parents[0]}/{file_to_send.stem}_res{file_to_send.suffix}'
+            img.save(new_path,optimize=True,quality=85)
+            file_order.remove(file_to_send)
+            file_to_send = pathlib.Path(new_path)
+            print("Файл було стиснуто.", end=" ")
+        else:
+            file_order.remove(file_to_send)
+
         print(f"Файл {file_to_send.name} додано у відкладені, заплановано на {datetime.fromtimestamp(timeslot)}")
         sender.send_photo(conf["main"]["channel_link"], photo=file_to_send, schedule_date=datetime.fromtimestamp(timeslot))
 
