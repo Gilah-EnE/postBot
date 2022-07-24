@@ -125,6 +125,11 @@ if conf["proxy"]["use"]:
     }
 else: proxy = None
 
+if conf["setup"]["use_caption"]:
+    with open(conf["files"]["caption_file"]) as cap_file:
+        caption = cap_file.read()
+else: caption = ""
+
 with pyrogram.Client("sender", api_id=conf["main"]["api_id"], api_hash=conf["main"]["api_hash"], proxy=proxy) as sender:
     for timeslot in slots:
         file_to_send = random.choice(file_order)
@@ -140,7 +145,7 @@ with pyrogram.Client("sender", api_id=conf["main"]["api_id"], api_hash=conf["mai
             file_order.remove(file_to_send)
 
         print(f"Файл {file_to_send.name} додано у відкладені, заплановано на {datetime.fromtimestamp(timeslot)}")
-        sender.send_photo(conf["main"]["channel_link"], photo=file_to_send, schedule_date=datetime.fromtimestamp(timeslot))
+        sender.send_photo(conf["main"]["channel_link"], photo=file_to_send, schedule_date=datetime.fromtimestamp(timeslot), caption=caption)
 
         if conf["files"]["file_action"] == "remove":
             file_to_send.unlink()
