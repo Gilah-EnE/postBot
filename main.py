@@ -2,7 +2,7 @@ import json
 import pathlib
 import random
 from datetime import datetime, timedelta
-from PIL import Image
+from PIL import Image, ImageOps
 
 import prettytable
 import pyrogram
@@ -12,11 +12,15 @@ conf = json.load(open("config.json", "r"))
 
 if conf["files"]["file_action"] not in ["remove", "move", "keep"]:
     print("Помилка: неправильно вказано дію з відправленим файлом.")
-    conf["files"]["file_action"] = input("keep - залишити; remove - видалити; move - перемістити в окрему папку. ")
+    conf["files"]["file_action"] = input(
+        "keep - залишити; remove - видалити; move - перемістити в окрему папку. "
+    )
 
 if conf["setup"]["date_input_needed"]:
-    raw_date = input("Введіть дату (ДД.ММ.РРРР), на яку треба заповнити відкладені"
-                     " (натисніть Enter для вибору сьогоднішнього дня): ")
+    raw_date = input(
+        "Введіть дату (ДД.ММ.РРРР), на яку треба заповнити відкладені"
+        " (натисніть Enter для вибору сьогоднішнього дня): "
+    )
 
     if raw_date != "":
         date = datetime.strptime(raw_date, "%d.%m.%Y")
@@ -25,7 +29,9 @@ if conf["setup"]["date_input_needed"]:
 else:
     date = datetime.today()
 
-days_in_advance = conf["setup"]["days_in_advance"] + 1     # variable context means "how many days to fill in advance", and range() func accepts quantity of elements to iterate over, not end value. That's why I added +1 as magic num.
+days_in_advance = (
+    conf["setup"]["days_in_advance"] + 1
+)  # variable context means "how many days to fill in advance", and range() func accepts quantity of elements to iterate over, not end value. That's why I added +1 as magic num.
 
 slots = list()
 
@@ -34,19 +40,32 @@ if conf["setup"]["mode"] == "fixed_interval":
 
     for day_in_advance in range(days_in_advance):
         if date.hour <= int(conf["setup"]["start_hour"]) or day_in_advance >= 1:
-            start_date = datetime(date.year, date.month, date.day, int(conf["setup"]["start_hour"])) + timedelta(days=day_in_advance)
+            start_date = datetime(
+                date.year, date.month, date.day, int(conf["setup"]["start_hour"])
+            ) + timedelta(days=day_in_advance)
         elif date.hour > int(conf["setup"]["start_hour"]):
-            start_date = datetime(date.year, date.month, date.day, int(date.hour)) + timedelta(days=day_in_advance)
+            start_date = datetime(
+                date.year, date.month, date.day, int(date.hour)
+            ) + timedelta(days=day_in_advance)
         else:
             start_date = None
 
-        stop_date = datetime(date.year, date.month, date.day, int(conf["setup"]["stop_hour"])) + timedelta(days=day_in_advance)
+        stop_date = datetime(
+            date.year, date.month, date.day, int(conf["setup"]["stop_hour"])
+        ) + timedelta(days=day_in_advance)
 
         new_initial_timestamp = int(start_date.timestamp())
         interval = conf["setup"]["interval"].split(":")
         interval_timestamp = int(int(interval[0]) * 3600 + int(interval[1]) * 60)
 
-        mod_list = [x for x in range(new_initial_timestamp, int(stop_date.timestamp() + 1), interval_timestamp)]
+        mod_list = [
+            x
+            for x in range(
+                new_initial_timestamp,
+                int(stop_date.timestamp() + 1),
+                interval_timestamp,
+            )
+        ]
 
         for mod in mod_list:
             if mod < int(initial_timestamp) and day_in_advance == 0:
@@ -62,8 +81,13 @@ elif conf["setup"]["mode"] == "manual":
 
     for day_in_advance in range(days_in_advance):
         for slot in cooked_list:
-            datetime_obj = datetime(date.year, date.month, date.day, int(slot[0]), int(slot[1]))
-            if int(datetime_obj.timestamp()) <= int(date.timestamp()) and day_in_advance == 0:
+            datetime_obj = datetime(
+                date.year, date.month, date.day, int(slot[0]), int(slot[1])
+            )
+            if (
+                int(datetime_obj.timestamp()) <= int(date.timestamp())
+                and day_in_advance == 0
+            ):
                 pass
             else:
                 slots.append(int(datetime_obj.timestamp()))
@@ -76,7 +100,9 @@ if conf["setup"]["verbose"]:
     [print(datetime.fromtimestamp(ts)) for ts in slots]
 
 if len(slots) >= 100:
-    continue_flag = input(f"Перевищено ліміт відкладених повідомлень. Останній запланований пост буде мати дату {datetime.fromtimestamp(slots[100])}. Продовжити чи скасувати (Y/N)? ")
+    continue_flag = input(
+        f"Перевищено ліміт відкладених повідомлень. Останній запланований пост буде мати дату {datetime.fromtimestamp(slots[100])}. Продовжити чи скасувати (Y/N)? "
+    )
     if continue_flag == "Y" or continue_flag == "y":
         slots = slots[0:100]
     elif continue_flag == "N" or continue_flag == "n":
@@ -91,8 +117,11 @@ if not path_object.exists():
 
 accepted_formats = conf["files"]["accepted_formats"]
 
-files = [[unit.stem, unit.suffix] for unit in path_object.iterdir() if
-         unit.is_file() and unit.suffix in accepted_formats]
+files = [
+    [unit.stem, unit.suffix]
+    for unit in path_object.iterdir()
+    if unit.is_file() and unit.suffix in accepted_formats
+]
 if conf["setup"]["verbose"]:
     table = prettytable.PrettyTable()
     table.field_names = ["Ім'я", "Розширення"]
@@ -100,7 +129,7 @@ if conf["setup"]["verbose"]:
     for file in files:
         table.add_row(file)
 
-    table.align["Ім\"я"] = "l"
+    table.align['Ім"я'] = "l"
     print(table)
 
 file_list = [unit for unit in path_object.iterdir() if unit.is_file()]
@@ -121,36 +150,70 @@ if conf["proxy"]["use"]:
         "hostname": conf["proxy"]["hostname"],
         "port": conf["proxy"]["port"],
         "username": conf["proxy"]["username"],
-        "password": conf["proxy"]["password"]
+        "password": conf["proxy"]["password"],
     }
-else: proxy = None
+else:
+    proxy = None
 
 if conf["setup"]["use_caption"]:
     with open(conf["files"]["caption_file"]) as cap_file:
         caption = cap_file.read()
-else: caption = ""
+else:
+    caption = ""
 
-with pyrogram.Client("sender", api_id=conf["main"]["api_id"], api_hash=conf["main"]["api_hash"], proxy=proxy) as sender:
+with pyrogram.Client(
+    "sender",
+    api_id=conf["main"]["api_id"],
+    api_hash=conf["main"]["api_hash"],
+    proxy=proxy,
+) as sender:
     for timeslot in slots:
         file_to_send = random.choice(file_order)
-        
-        if file_to_send.stat().st_size / 1048576 > 5:
-            img = Image.open(file_to_send)
-            new_path = f'{file_to_send.parents[0]}/{file_to_send.stem}_res{file_to_send.suffix}'
-            img.save(new_path,optimize=True,quality=85)
+
+        img = Image.open(file_to_send)
+        if img.size[0] + img.size[1] >= 10000 or img.size[0] / img.size[1] > 20:
+            print("Файл занадто великий, зменшуємо роздільну здатність.")
+            new_img = ImageOps.contain(img, (5000, 5000), Image.Resampling.LANCZOS)
+            new_img.save(
+                f"{file_to_send.parents[0]}/{file_to_send.stem}_res{file_to_send.suffix}",
+                optimize=True,
+                quality=85,
+            )
+            file_order.remove(file_to_send)
+            file_to_send = pathlib.Path(
+                f"{file_to_send.parents[0]}/{file_to_send.stem}_res{file_to_send.suffix}"
+            )
+            modded = True
+        elif file_to_send.stat().st_size / 1048576 > 9.4:  # 10MB = 9,5367431641 MiB
+            print("Файл занадто великий, виконуємо компресію.")
+            new_path = f"{file_to_send.parents[0]}/{file_to_send.stem}_res{file_to_send.suffix}"
+            img.save(new_path, optimize=True, quality=85)
             file_order.remove(file_to_send)
             file_to_send = pathlib.Path(new_path)
-            print("Файл було стиснуто.", end=" ")
+            modded = True
         else:
             file_order.remove(file_to_send)
+            modded = False
 
-        print(f"Файл {file_to_send.name} додано у відкладені, заплановано на {datetime.fromtimestamp(timeslot)}")
-        sender.send_photo(conf["main"]["channel_link"], photo=file_to_send, schedule_date=datetime.fromtimestamp(timeslot), caption=caption)
+        print(
+            f"Файл {file_to_send.name} додано у відкладені, заплановано на {datetime.fromtimestamp(timeslot)}"
+        )
+        sender.send_photo(
+            conf["main"]["channel_link"],
+            photo=file_to_send,
+            schedule_date=datetime.fromtimestamp(timeslot),
+            caption=caption,
+        )
+
+        if modded:
+            origin = f"{file_to_send.parents[0]}\\{file_to_send.stem[:-4]}{file_to_send.suffix}"
+            file_to_send.unlink()
+            file_to_send = pathlib.Path(origin)
 
         if conf["files"]["file_action"] == "remove":
             file_to_send.unlink()
         elif conf["files"]["file_action"] == "move":
-            file_to_send.rename(f"{str(path_object)}/Надіслані/{file_to_send.name}")
+            file_to_send.rename(f"{str(path_object)}\\Надіслані\\{file_to_send.name}")
         elif conf["files"]["file_action"] == "keep":
             pass
         else:
@@ -160,11 +223,15 @@ with pyrogram.Client("sender", api_id=conf["main"]["api_id"], api_hash=conf["mai
     if len(file_order) == 0:
         print("Всі файли відправлено.")
     else:
-            print(f"Не відправлено {len(file_order)} файл(ів), а саме {[file.name for file in file_order if file.is_file()]}")
+        print(
+            f"Не відправлено {len(file_order)} файл(ів), а саме {[file.name for file in file_order if file.is_file()]}"
+        )
 
-    request = sender.invoke(functions.messages.GetScheduledHistory(
-        peer=sender.resolve_peer(conf["main"]["channel_link"]),
-        hash=0))
+    request = sender.invoke(
+        functions.messages.GetScheduledHistory(
+            peer=sender.resolve_peer(conf["main"]["channel_link"]), hash=0
+        )
+    )
 
     with open(conf["files"]["temp_filename"], "w") as temp_file_object:
         print(request, file=temp_file_object)
