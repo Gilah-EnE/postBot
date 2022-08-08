@@ -19,7 +19,8 @@
         "interval": "01:00",
         "date_input_needed": false,
         "verbose": true,
-        "days_in_advance": 20
+        "days_in_advance": 2,
+        "use_caption": true
     },
     "timetable": {
         "manual_slots": ["1:23", "2:34", "3:45", "4:56"]
@@ -28,6 +29,7 @@
         "path": "D:/dataset",
         "accepted_formats": [".jpg", ".png"],
         "file_action": "keep",
+        "caption_file": "./caption.txt",
         "temp_filename": "posts.json",
         "remove_temp_file": false
     }
