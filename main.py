@@ -200,12 +200,16 @@ with pyrogram.Client(
         print(
             f"Файл {file_to_send.name} додано у відкладені, заплановано на {datetime.fromtimestamp(timeslot)}"
         )
-        sender.send_photo(
-            conf["main"]["channel_link"],
-            photo=file_to_send,
-            schedule_date=datetime.fromtimestamp(timeslot),
-            caption=caption,
-        )
+        try:
+            sender.send_photo(
+                conf["main"]["channel_link"],
+                photo=file_to_send,
+                schedule_date=datetime.fromtimestamp(timeslot),
+                caption=caption,
+            )
+        except Exception as e:
+            print(e)
+            exit(1)
 
         if modded:
             origin = f"{file_to_send.parents[0]}\\{file_to_send.stem[:-4]}{file_to_send.suffix}"
