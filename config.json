@@ -29,7 +29,6 @@
         "path": "D:/dataset",
         "accepted_formats": [".jpg", ".png"],
         "file_action": "keep",
-        "caption_file": "./caption.txt",
         "temp_filename": "posts.json",
         "remove_temp_file": false,
         "caption_file": "./caption.txt"
