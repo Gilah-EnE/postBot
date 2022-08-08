@@ -31,6 +31,7 @@
         "file_action": "keep",
         "caption_file": "./caption.txt",
         "temp_filename": "posts.json",
-        "remove_temp_file": false
+        "remove_temp_file": false,
+        "caption_file": "./caption.txt"
     }
 }
