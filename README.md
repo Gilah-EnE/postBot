@@ -20,7 +20,6 @@
 |port  	|Port number  	|
 |username  	|Username (can be empty)  	|
 |password  	|Password (can be empty)  	|
-|  	|  	|
 ### setup
 | Parameter | Description |
 |---|--------------------------|
