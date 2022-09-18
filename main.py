@@ -2,10 +2,10 @@ import json
 import pathlib
 import random
 from datetime import datetime, timedelta
-from PIL import Image, ImageOps
 
 import prettytable
 import pyrogram
+from PIL import Image, ImageOps
 from pyrogram.raw import functions
 
 conf = json.load(open("config.json", "r"))
@@ -244,10 +244,6 @@ with pyrogram.Client(
     with open(conf["files"]["temp_filename"], "r") as temp_file_object:
         data = json.load(temp_file_object)
 
-    with pathlib.Path("./posts.json") as temp_file_pathlib:
-        if temp_file_pathlib.exists() and conf["files"]["remove_temp_file"]:
-            temp_file_pathlib.unlink()
-
 msg = data["messages"]
 checklist = list()
 
@@ -262,3 +258,7 @@ for message in msg:
     if conf["setup"]["verbose"]:
         print(msg_date)
         checklist.append(msg_date)
+
+with pathlib.Path("./posts.json") as temp_file_pathlib:
+    if temp_file_pathlib.exists() and conf["files"]["remove_temp_file"]:
+        temp_file_pathlib.unlink()
