@@ -1,46 +1,46 @@
 # postBot
- An automated post bot for Telegram that sends pictures from a folder with fixed intervals or according to the timetable. Useful for channels with artwork or pictures, especially if admins are lazy :)
-## Usage
- - Install requirements from file ``` pip install -r requirements.txt ```
- - Edit configuration file (config.py is deprecated)
- - Run main.py
-## Config parameters
+ Бот для автоматизації каналів з артами в Telegram.
+## Використання
+ 1. Встановити залежності з файлу: ``` pip install -r requirements.txt ```
+ 2. Відредагуйте файл конфігурації (config.py не використовується, майте на увазі при оновленні)
+ 3. Запустіть main.py
+## Опис файлу конфігурації
 ### main
-| Parameter | Description |
+| Параметр | Опис |
 |---|--------------------------|
-| api_id 	| Get on my.telegram.org 	|
-| api_hash 	| Get on my.telegram.org 	|
-| channel_link 	| Link to channel, only public channels are supported, "me" to send to saved messages 	|
+| api_id 	| Потрібно отримати на my.telegram.org 	|
+| api_hash 	| Потрібно отримати на my.telegram.org 	|
+| channel_link 	| Посилання на канал, канал повинен бути публічним. Для тесту можна вказати "me" 	|
 ### proxy
-| Parameter | Description |
+| Параметр | Опис |
 |---|--------------------------|
-|use  	|(true/false), use proxy or not.  	|
-|scheme  	|(SOCKS4/SOCKS5/HTTP), type of proxy  	|
-|hostname  	|URL of proxy server  	|
-|port  	|Port number  	|
-|username  	|Username (can be empty)  	|
-|password  	|Password (can be empty)  	|
+|use  	|(true/false), використання проксі.  	|
+|scheme  	|(SOCKS4/SOCKS5/HTTP), тип проксі  	|
+|hostname  	|URL або IP-адреса сервера  	|
+|port  	|Порт  	|
+|username  	|Ім'я користувача (може бути пустим)  	|
+|password  	|Пароль (може бути пустим)  	|
 ### setup
-| Parameter | Description |
+| Параметр | Опис |
 |---|--------------------------|
-|mode  	|(fixed_interval/manual), selects generation mode. Fixed interval means that you enter start and final hour values and intervals. The fixed mode works with pre-defined slots. 	|
-|start_hour  	|When to land the first post.  	|
-|stop_hour  	|When to land the last post.  	|
-|interval  	|("hh:mm"), interval between posts  	|
-|date_input_needed  	|(true/false), if unchecked, sends to current date.  	|
-|verbose  	|(true/false), sends more output to console. 	|
-|days_in_advance  	|How many days to fill in advance? 0 to disable.  	|
-|use_caption  	|(true/false), activate to use caption under photo.  	|
+|mode  	|(fixed_interval/manual), вибір режиму роботи. Режим "fixed_interval" публікує пости через заданий проміжок часу. Режим "manual" використовує заданий розклад. 	|
+|start_hour  	|Час публікації першого посту.  	|
+|stop_hour  	|Час публікації останнього посту.  	|
+|interval  	|("hh:mm"), інтервал між постами.  	|
+|date_input_needed  	|(true/false), флаг вибору початкової дати. Якщо false - вибирається поточний дент  	|
+|verbose  	|(true/false), вербальний режим. 	|
+|days_in_advance  	|Заповнення на декілька днів наперед. Встановіть 0 для вимкнення.  	|
+|use_caption  	|(true/false), Додавання підпису до посту.  	|
 ### timetable
-| Parameter | Description |
+| Параметр | Опис |
 |---|--------------------------|
-|manual_slots  	|(list), list of pre-defined slots. Works if the mode is "manual" 	|
+|manual_slots  	|(list), розклад публікації. Тільки для режиму "manual". 	|
 ### files
-| Parameter | Description |
+| Параметр | Опис |
 |---|--------------------------|
-|path  	|Path to the folder with photos 	|
-|accepted_formats  	|(list), file extensions that can be accepted 	|
-|file_action  	|("remove"/"move"/"keep"), what to do with sent file ("remove" deletes it, "move" moves to new folder, "keep" does absolutely nothing) 	|
-|caption_file  	|File with caption 	|
-|temp_filename  	|Name for temp file with all sent posts 	|
-|remove_temp_file  	|(true/false), keep or remove temp file, useful for debugging 	|
+|path  	|Шлях до папки з картинками. 	|
+|accepted_formats  	|(list), перелік дозволених розширень. 	|
+|file_action  	|("remove"/"move"/"keep"), вибір дії над файлом після надсилання ("remove" видаляє, "move" переміщує в окрему папку, "keep" не робить нічого). 	|
+|caption_file  	|Файл з підписом. 	|
+|temp_filename  	|Для дебагу. Місце збереження файлу перевірки коректності відправлення постів. 	|
+|remove_temp_file  	|(true/false), вмикає зберігання файлу відлагодження. 	|
