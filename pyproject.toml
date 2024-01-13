@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "postbot"
+version = "1.0.0"
+description = "Automation bot for Telegram art channels"
+authors = ["Artem <63448341+Gilah-EnE@users.noreply.github.com>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pillow = "^10.2.0"
+prettytable = "^3.9.0"
+Pyrogram = "^2.0.106"
+TgCrypto = "^1.2.5"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.1"
+bandit = "^1.7.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
