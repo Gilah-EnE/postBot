@@ -30,7 +30,7 @@ else:
     date = datetime.today()
 
 days_in_advance = (
-        conf["setup"]["days_in_advance"] + 1
+    conf["setup"]["days_in_advance"] + 1
 )  # variable context means "how many days to fill in advance", and range() func accepts quantity of elements to iterate over, not end value. That's why I added +1 as magic num.
 
 slots = list()
@@ -85,8 +85,8 @@ elif conf["setup"]["mode"] == "manual":
                 date.year, date.month, date.day, int(slot[0]), int(slot[1])
             )
             if (
-                    int(datetime_obj.timestamp()) <= int(date.timestamp())
-                    and day_in_advance == 0
+                int(datetime_obj.timestamp()) <= int(date.timestamp())
+                and day_in_advance == 0
             ):
                 pass
             else:
@@ -162,10 +162,10 @@ else:
     caption = ""
 
 with pyrogram.Client(
-        "sender",
-        api_id=conf["main"]["api_id"],
-        api_hash=conf["main"]["api_hash"],
-        proxy=proxy,
+    "sender",
+    api_id=conf["main"]["api_id"],
+    api_hash=conf["main"]["api_hash"],
+    proxy=proxy,
 ) as sender:
     for timeslot in slots:
         file_to_send = random.choice(file_order)
