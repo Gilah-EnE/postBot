@@ -14,7 +14,7 @@ Pyrogram = "^2.0.106"
 TgCrypto = "^1.2.5"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.12.1"
+black = "^24.3.0"
 bandit = "^1.7.6"
 
 [build-system]
